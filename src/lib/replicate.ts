@@ -42,21 +42,24 @@ export async function generateDraft(input: GenerateInput): Promise<GenerateResul
   if (input.productImageDataUrl) {
     // Ürün + oda: p-image-edit ile yerleştirme
     const position = input.placementHint?.trim()
-      ? `Position it ${input.placementHint.trim()}.`
-      : `Position it naturally against the wall or in a suitable spot.`;
+      ? `Position it ${input.placementHint.trim()}, without covering any doors or windows.`
+      : `Position it against a clear, empty section of the wall, without covering any doors or windows.`;
 
     const placementPrompt =
-      `Place the furniture/product shown in image 2 into the room shown in image 1. ` +
+      `Edit image 1 (the room) by adding the furniture item from image 2 into it. ` +
+      `Preserve the exact design, shape, color, material and proportions of the product shown in image 2 — ` +
+      `do not redesign, restyle or reinterpret it, copy it as-is. ` +
+      `Do not change the walls, wall color, floor, door, windows or any other existing element of the room in image 1. ` +
       `${position} ` +
-      `Match the room's lighting, perspective and style. ` +
-      `Keep the room structure intact. High quality, photorealistic result.`;
+      `Match the room's perspective, scale and lighting so the product blends in naturally. ` +
+      `Photorealistic, high detail, seamless and realistic integration.`;
 
     output = await replicate.run(PLACEMENT_MODEL as `${string}/${string}`, {
       input: {
         prompt: placementPrompt,
         images: [input.imageDataUrl, input.productImageDataUrl],
         aspect_ratio: "match_input_image",
-        turbo: true,
+        turbo: false,
       },
     });
   } else {

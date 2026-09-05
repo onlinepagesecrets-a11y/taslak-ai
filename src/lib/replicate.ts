@@ -56,7 +56,10 @@ export async function generateDraft(input: GenerateInput): Promise<GenerateResul
       `Keep the furniture's design, color, material and relative proportions faithful to the reference, but scale ` +
       `it realistically: its height, width and depth must be proportional to real-world furniture size and to the ` +
       `room's existing elements (door height, ceiling height, floor tiles/rug) visible in the first image — it must ` +
-      `not look stretched, oversized, undersized or distorted. ` +
+      `not look stretched, oversized, distorted, small, shrunken, plain or understated. Render it at a confident, ` +
+      `generous, true-to-reference scale so it has the same strong visual presence and level of detail it has in ` +
+      `the second image — a full-size piece of furniture occupying the wall space naturally, not a miniature or ` +
+      `simplified version. ` +
       `The base of the furniture must sit flush and flat on the floor with a correct contact shadow. ` +
       `${position} ` +
       `Match the room's lighting direction and color temperature so shadows and highlights on the furniture are ` +

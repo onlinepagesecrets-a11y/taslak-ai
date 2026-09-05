@@ -46,21 +46,30 @@ export async function generateDraft(input: GenerateInput): Promise<GenerateResul
       : `Place it against a clear, empty section of the wall, without covering any doors or windows.`;
 
     const placementPrompt =
-      `The first image is a room. The second image is a furniture/product item. ` +
+      `The first image is a room photo. The second image is a furniture/product reference (usually a flat, ` +
+      `front-facing studio product photo). ` +
       `Keep the first image exactly as it is — same walls, wall color, wallpaper pattern, door, door design, floor, ` +
-      `windows, lighting and camera angle must remain unchanged. Do not regenerate or restyle the room. ` +
-      `Add the exact furniture item from the second image into this room, keeping its design, color, material, ` +
-      `and proportions identical to the reference — do not redesign it. ` +
+      `windows, ceiling, lighting and camera angle must remain unchanged. Do not regenerate or restyle the room. ` +
+      `Take the furniture item shown in the second image and re-render it from the exact same camera angle and ` +
+      `perspective as the room in the first image — if the room is shot at a slight angle, the furniture must be ` +
+      `rotated/angled to match that same perspective, not placed flat-on like the original product photo. ` +
+      `Keep the furniture's design, color, material and relative proportions faithful to the reference, but scale ` +
+      `it realistically: its height, width and depth must be proportional to real-world furniture size and to the ` +
+      `room's existing elements (door height, ceiling height, floor tiles/rug) visible in the first image — it must ` +
+      `not look stretched, oversized, undersized or distorted. ` +
+      `The base of the furniture must sit flush and flat on the floor with a correct contact shadow. ` +
       `${position} ` +
-      `Blend it naturally into the room with correct scale, perspective and matching shadows/lighting. ` +
-      `The result must look like a single real photograph, photorealistic, seamless, no visible editing artifacts.`;
+      `Match the room's lighting direction and color temperature so shadows and highlights on the furniture are ` +
+      `consistent with the rest of the photo. ` +
+      `The final result must look like a single real, unedited photograph — photorealistic, correct perspective, ` +
+      `correct proportions, no visible seams, no distortion, no floating objects.`;
 
     output = await replicate.run(PLACEMENT_MODEL as `${string}/${string}`, {
       input: {
         prompt: placementPrompt,
         image_input: [input.imageDataUrl, input.productImageDataUrl],
         aspect_ratio: "match_input_image",
-        resolution: "1K",
+        resolution: "2K",
         output_format: "png",
       },
     });

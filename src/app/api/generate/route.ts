@@ -50,7 +50,14 @@ export async function POST(request: Request) {
   }
 
   try {
-    const result = await generateDraft({ imageDataUrl, productImageDataUrl, prompt, negativePrompt, apiToken: userApiToken });
+    const result = await generateDraft({
+      imageDataUrl,
+      productImageDataUrl,
+      prompt,
+      negativePrompt,
+      placementHint: userRequest || undefined,
+      apiToken: userApiToken,
+    });
     return NextResponse.json({ ...result, prompt });
   } catch (err) {
     console.error("generate route error:", err);

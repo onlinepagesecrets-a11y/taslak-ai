@@ -5,6 +5,8 @@ export type GenerateInput = {
   productImageDataUrl?: string;
   prompt: string;
   negativePrompt: string;
+  /** Kullanıcının konum tercihi, ürün yerleştirme modunda placement prompt'a eklenir */
+  placementHint?: string;
   apiToken?: string;
 };
 
@@ -39,9 +41,13 @@ export async function generateDraft(input: GenerateInput): Promise<GenerateResul
 
   if (input.productImageDataUrl) {
     // Ürün + oda: p-image-edit ile yerleştirme
+    const position = input.placementHint?.trim()
+      ? `Position it ${input.placementHint.trim()}.`
+      : `Position it naturally against the wall or in a suitable spot.`;
+
     const placementPrompt =
       `Place the furniture/product shown in image 2 into the room shown in image 1. ` +
-      `Position it naturally and realistically against the wall. ` +
+      `${position} ` +
       `Match the room's lighting, perspective and style. ` +
       `Keep the room structure intact. High quality, photorealistic result.`;
 

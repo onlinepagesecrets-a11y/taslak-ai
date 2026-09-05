@@ -370,6 +370,19 @@ body {
 }
 .api-key-actions { display: flex; gap: 8px; }
 
+/* --- Ürün yerleştirme modu --- */
+.product-mode-info {
+  background: var(--accent-soft); border: 1px solid var(--accent);
+  border-radius: 10px; padding: 12px 16px; margin-bottom: 16px;
+}
+.product-mode-badge {
+  display: inline-block; font-size: 11px; font-weight: 700;
+  background: var(--accent); color: var(--accent-ink);
+  padding: 2px 10px; border-radius: 10px; margin-bottom: 6px;
+  text-transform: uppercase; letter-spacing: 0.04em;
+}
+.product-mode-info p { font-size: 13px; color: var(--ink-soft); line-height: 1.5; }
+
 /* --- API key banner (ana sayfa uyarısı) --- */
 .api-key-banner {
   display: flex; align-items: center; justify-content: space-between; gap: 12px;

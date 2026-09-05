@@ -115,7 +115,25 @@ export default function Home() {
             </div>
             <RoomTypePicker value={roomType} onChange={setRoomType} />
 
-            {roomType === "kitchen" ? (
+            {productFile ? (
+              /* Ürün görseli var — konum + ek not */
+              <div className="configurator">
+                <div className="product-mode-info">
+                  <span className="product-mode-badge">Ürün Yerleştirme Modu</span>
+                  <p>AI, ürünü referans görselinden tanıyıp odaya yerleştirecek.</p>
+                </div>
+                <section className="config-section">
+                  <span className="config-label">Konum Tercihi (opsiyonel)</span>
+                  <input
+                    className="prompt-input"
+                    type="text"
+                    placeholder="örn. 'sol duvara', 'odanın ortasına', 'pencere kenarına'"
+                    value={userRequest}
+                    onChange={(e) => setUserRequest(e.target.value)}
+                  />
+                </section>
+              </div>
+            ) : roomType === "kitchen" ? (
               <KitchenConfigurator value={kitchenConfig} onChange={setKitchenConfig} />
             ) : (
               <div className="configurator">
@@ -134,7 +152,7 @@ export default function Home() {
                   <input
                     className="prompt-input"
                     type="text"
-                    placeholder="İstek (opsiyonel) — örn. 'modern, sade çizgiler'"
+                    placeholder="örn. 'modern, sade çizgiler'"
                     value={userRequest}
                     onChange={(e) => setUserRequest(e.target.value)}
                   />

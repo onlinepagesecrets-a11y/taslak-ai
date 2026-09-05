@@ -21,11 +21,14 @@ export type GenerateResult = {
  * across model updates, so this is left to configuration rather than hardcoded.
  * Verified live candidate: https://replicate.com/adirik/interior-design
  */
+const DEFAULT_MODEL =
+  "adirik/interior-design:76604baddc85b1b4616e1c6475eca080da339c8875bd4996705440484a6eac38";
+
 export async function generateDraft(input: GenerateInput): Promise<GenerateResult> {
   const token = input.apiToken || process.env.REPLICATE_API_TOKEN;
-  const model = process.env.REPLICATE_MODEL;
+  const model = process.env.REPLICATE_MODEL || DEFAULT_MODEL;
 
-  if (!token || !model) {
+  if (!token) {
     return { demo: true };
   }
 

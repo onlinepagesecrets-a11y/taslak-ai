@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import Link from "next/link";
 import UploadDropzone from "@/components/UploadDropzone";
 import RoomTypePicker from "@/components/RoomTypePicker";
 import KitchenConfigurator from "@/components/KitchenConfigurator";
@@ -8,6 +9,8 @@ import ColorPicker from "@/components/ColorPicker";
 import ResultGallery, { type GenerateResponse } from "@/components/ResultGallery";
 import { DEFAULT_KITCHEN_CONFIG, type KitchenConfig } from "@/lib/kitchenOptions";
 import type { RoomType } from "@/lib/promptTemplates";
+
+const STORAGE_KEY = "replicate_api_key";
 
 type Stage = "form" | "generating" | "result";
 
@@ -23,9 +26,20 @@ export default function Home() {
   const [kitchenConfig, setKitchenConfig] = useState<KitchenConfig>(DEFAULT_KITCHEN_CONFIG);
   const [stage, setStage] = useState<Stage>("form");
   const [result, setResult] = useState<GenerateResponse | null>(null);
+  const [hasApiKey, setHasApiKey] = useState(false);
+
+  useEffect(() => {
+    try {
+      setHasApiKey(!!localStorage.getItem(STORAGE_KEY));
+    } catch {}
+  }, []);
 
   async function handleGenerate() {
     if (!file) return;
+
+    let apiKey = "";
+    try { apiKey = localStorage.getItem(STORAGE_KEY) ?? ""; } catch {}
+
     setStage("generating");
 
     const formData = new FormData();
@@ -41,8 +55,11 @@ export default function Home() {
       if (colorName) formData.append("colorName", colorName);
     }
 
+    const headers: Record<string, string> = {};
+    if (apiKey) headers["x-replicate-key"] = apiKey;
+
     try {
-      const res = await fetch("/api/generate", { method: "POST", body: formData });
+      const res = await fetch("/api/generate", { method: "POST", body: formData, headers });
       const data: GenerateResponse = await res.json();
       setResult(data);
     } catch {
@@ -64,6 +81,15 @@ export default function Home() {
         <h1>Boş Alanı Taslağa Çevir</h1>
         <p>Fotoğrafı yükle, tasarım tercihlerini seç — yapı korunarak gerçekçi bir taslak üretilsin.</p>
       </header>
+
+      {!hasApiKey && (
+        <div className="api-key-banner">
+          <span>Taslak üretmek için Replicate API anahtarı gerekli.</span>
+          <Link href="/settings" className="btn btn--ghost" style={{ fontSize: 13, padding: "6px 14px" }}>
+            Ayarlara Git
+          </Link>
+        </div>
+      )}
 
       <div className="card">
         {stage === "form" && (

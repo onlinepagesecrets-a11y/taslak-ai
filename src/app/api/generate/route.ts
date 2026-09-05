@@ -4,6 +4,9 @@ import { buildKitchenNegativePrompt, buildKitchenPrompt, type KitchenConfig } fr
 import { generateDraft } from "@/lib/replicate";
 
 export async function POST(request: Request) {
+  // Kullanıcının tarayıcısından gelen Replicate API anahtarı (localStorage → header)
+  const userApiToken = request.headers.get("x-replicate-key") ?? undefined;
+
   const formData = await request.formData();
   const image = formData.get("image");
   const productImage = formData.get("productImage");
@@ -47,7 +50,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const result = await generateDraft({ imageDataUrl, productImageDataUrl, prompt, negativePrompt });
+    const result = await generateDraft({ imageDataUrl, productImageDataUrl, prompt, negativePrompt, apiToken: userApiToken });
     return NextResponse.json({ ...result, prompt });
   } catch (err) {
     console.error("generate route error:", err);

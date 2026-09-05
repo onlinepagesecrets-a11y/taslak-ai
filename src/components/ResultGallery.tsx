@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 export type GenerateResponse = {
   demo: boolean;
   imageUrl?: string;
@@ -14,16 +16,45 @@ type Props = {
   beforePreviewUrl: string;
   result: GenerateResponse;
   onRetry: () => void;
+  onReset: () => void;
 };
 
-export default function ResultGallery({ beforePreviewUrl, result, onRetry }: Props) {
+export default function ResultGallery({ beforePreviewUrl, result, onRetry, onReset }: Props) {
+  const [downloading, setDownloading] = useState(false);
+
+  async function handleDownload() {
+    if (!result.imageUrl) return;
+    setDownloading(true);
+    try {
+      const res = await fetch(result.imageUrl);
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `taslak-ai-${Date.now()}.png`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch {
+      window.open(result.imageUrl, "_blank");
+    } finally {
+      setDownloading(false);
+    }
+  }
+
   if (result.error) {
     return (
       <div className="result-error">
         <p>{result.error}</p>
-        <button className="btn btn--ghost" onClick={onRetry}>
-          Yeniden Dene
-        </button>
+        <div className="result-actions">
+          <button className="btn btn--ghost" onClick={onRetry}>
+            Yeniden Dene
+          </button>
+          <button className="btn btn--ghost" onClick={onReset}>
+            Sil / Baştan Başla
+          </button>
+        </div>
       </div>
     );
   }
@@ -41,9 +72,14 @@ export default function ResultGallery({ beforePreviewUrl, result, onRetry }: Pro
           <p className="demo-notice__prompt">
             Üretilecek prompt: <em>{result.prompt}</em>
           </p>
-          <button className="btn" onClick={onRetry}>
-            Yeniden Dene
-          </button>
+          <div className="result-actions">
+            <button className="btn" onClick={onRetry}>
+              Yeniden Dene
+            </button>
+            <button className="btn btn--ghost" onClick={onReset}>
+              Sil / Baştan Başla
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -63,9 +99,17 @@ export default function ResultGallery({ beforePreviewUrl, result, onRetry }: Pro
           <img src={result.imageUrl} alt="AI tarafından üretilen taslak" />
         </figure>
       </div>
-      <button className="btn btn--ghost" onClick={onRetry}>
-        Yeniden Dene
-      </button>
+      <div className="result-actions">
+        <button className="btn" onClick={handleDownload} disabled={downloading}>
+          {downloading ? "İndiriliyor…" : "İndir"}
+        </button>
+        <button className="btn btn--ghost" onClick={onRetry}>
+          Yeniden Dene
+        </button>
+        <button className="btn btn--ghost" onClick={onReset}>
+          Sil / Baştan Başla
+        </button>
+      </div>
     </div>
   );
 }

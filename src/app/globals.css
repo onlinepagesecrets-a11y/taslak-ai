@@ -204,6 +204,10 @@ body {
 .result-error { text-align: center; }
 .result-error p { color: var(--danger); margin-bottom: 14px; font-size: 14px; }
 
+.result-actions {
+  display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;
+}
+
 .configurator { display: flex; flex-direction: column; gap: 20px; margin-bottom: 20px; }
 .config-section { display: flex; flex-direction: column; gap: 8px; }
 .config-label {

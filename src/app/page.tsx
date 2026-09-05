@@ -74,6 +74,16 @@ export default function Home() {
     setResult(null);
   }
 
+  function handleReset() {
+    setFile(null);
+    setPreviewUrl(null);
+    setProductFile(null);
+    setProductPreviewUrl(null);
+    setUserRequest("");
+    setResult(null);
+    setStage("form");
+  }
+
   return (
     <main className="page">
       <header className="hero">
@@ -176,7 +186,12 @@ export default function Home() {
         )}
 
         {stage === "result" && result && previewUrl && (
-          <ResultGallery beforePreviewUrl={previewUrl} result={result} onRetry={handleRetry} />
+          <ResultGallery
+            beforePreviewUrl={previewUrl}
+            result={result}
+            onRetry={handleRetry}
+            onReset={handleReset}
+          />
         )}
       </div>
     </main>

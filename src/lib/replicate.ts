@@ -2,11 +2,9 @@ import Replicate from "replicate";
 
 export type GenerateInput = {
   imageDataUrl: string;
-  /** Yerleştirilecek ürün/mobilya fotoğrafı (opsiyonel). Model destekliyorsa ikinci görsel olarak iletilir. */
   productImageDataUrl?: string;
   prompt: string;
   negativePrompt: string;
-  /** Kullanıcının kendi Replicate API anahtarı (BYOK). Verilmezse process.env.REPLICATE_API_TOKEN'a düşer (yalnızca yerel demo için). */
   apiToken?: string;
 };
 
@@ -15,54 +13,63 @@ export type GenerateResult = {
   imageUrl?: string;
 };
 
-/**
- * REPLICATE_MODEL must be a full "owner/name:version" string, copied from the
- * model's API tab on replicate.com — Replicate version hashes are not stable
- * across model updates, so this is left to configuration rather than hardcoded.
- * Verified live candidate: https://replicate.com/adirik/interior-design
- */
-const DEFAULT_MODEL =
+// Oda tasarımı (tek görsel + prompt)
+const INTERIOR_MODEL =
   "adirik/interior-design:76604baddc85b1b4616e1c6475eca080da339c8875bd4996705440484a6eac38";
+
+// Ürün yerleştirme (iki görsel: oda + ürün)
+const PLACEMENT_MODEL = "prunaai/p-image-edit";
+
+function extractUrl(output: unknown): string | undefined {
+  const result = Array.isArray(output) ? output[0] : output;
+  if (typeof result === "string") return result;
+  if (typeof (result as { url?: () => URL })?.url === "function") {
+    return (result as { url: () => URL }).url().toString();
+  }
+  return undefined;
+}
 
 export async function generateDraft(input: GenerateInput): Promise<GenerateResult> {
   const token = input.apiToken || process.env.REPLICATE_API_TOKEN;
-  const model = process.env.REPLICATE_MODEL || DEFAULT_MODEL;
-
-  if (!token) {
-    return { demo: true };
-  }
+  if (!token) return { demo: true };
 
   const replicate = new Replicate({ auth: token });
 
-  const modelInput: Record<string, unknown> = {
-    image: input.imageDataUrl,
-    prompt: input.prompt,
-    negative_prompt: input.negativePrompt,
-    guidance_scale: 15,
-    prompt_strength: 0.8,
-    num_inference_steps: 30,
-  };
+  let output: unknown;
 
-  // Ürün görseli varsa modele ilet (model destekliyorsa kullanır)
   if (input.productImageDataUrl) {
-    modelInput.product_image = input.productImageDataUrl;
+    // Ürün + oda: p-image-edit ile yerleştirme
+    const placementPrompt =
+      `Place the furniture/product shown in image 2 into the room shown in image 1. ` +
+      `Position it naturally and realistically against the wall. ` +
+      `Match the room's lighting, perspective and style. ` +
+      `Keep the room structure intact. High quality, photorealistic result.`;
+
+    output = await replicate.run(PLACEMENT_MODEL as `${string}/${string}`, {
+      input: {
+        prompt: placementPrompt,
+        images: [input.imageDataUrl, input.productImageDataUrl],
+        aspect_ratio: "match_input_image",
+        turbo: true,
+      },
+    });
+  } else {
+    // Sadece oda: interior-design modeli
+    const model = process.env.REPLICATE_MODEL || INTERIOR_MODEL;
+    output = await replicate.run(model as `${string}/${string}:${string}`, {
+      input: {
+        image: input.imageDataUrl,
+        prompt: input.prompt,
+        negative_prompt: input.negativePrompt,
+        guidance_scale: 15,
+        prompt_strength: 0.8,
+        num_inference_steps: 30,
+      },
+    });
   }
 
-  const output = await replicate.run(model as `${string}/${string}:${string}`, {
-    input: modelInput,
-  });
-
-  const result = Array.isArray(output) ? output[0] : output;
-  const url =
-    typeof result === "string"
-      ? result
-      : typeof (result as { url?: () => URL })?.url === "function"
-        ? (result as { url: () => URL }).url().toString()
-        : undefined;
-
-  if (!url) {
-    throw new Error("Replicate yanıtından görsel URL'i okunamadı.");
-  }
+  const url = extractUrl(output);
+  if (!url) throw new Error("Replicate yanıtından görsel URL'i okunamadı.");
 
   return { demo: false, imageUrl: url };
 }

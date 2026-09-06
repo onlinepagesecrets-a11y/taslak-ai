@@ -69,7 +69,7 @@ export async function generateDraft(input: GenerateInput): Promise<GenerateResul
         prompt: buildPlacementPrompt(input.placementHint),
         input_images: [input.imageDataUrl, input.productImageDataUrl],
         aspect_ratio: "auto",
-        quality: "high",
+        quality: "medium",
         output_format: "png",
       },
     });
